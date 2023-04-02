@@ -3,6 +3,12 @@
 ## Machine learning App
 Given comment, the application infers the sentiment. 
 
+### docker build and push to docker hub 
+```
+docker image build -t yaqianqi/devops
+docker push yaqianqi/devops
+```
+
 ## Start 
 ```
 vagrant up
