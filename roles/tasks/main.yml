@@ -1,0 +1,36 @@
+---
+
+- name: "Add Docker GPG key"
+  ansible.builtin.apt_key:
+    url: "https://download.docker.com/linux/ubuntu/gpg"
+    state: "present"
+
+- name: "Determine the distribution"
+  command: "lsb_release -sc"
+  register: lsb_release
+  changed_when: False
+
+- name: "Add Docker repository "
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ lsb_release.stdout }} stable"
+    state: present
+    update_cache: yes
+
+- name: "Install docker"
+  ansible.builtin.apt:
+    pkg: "{{ item }}"
+    state: "present"
+  with_items:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+
+- name: "Add users to docker group"
+  ansible.builtin.user:
+    user: "{{ item }}"
+    groups: "docker"
+    append: True
+  with_items: "{{ docker_users }}"
+
+- name: "Reset connection in order to apply docker group membership"
+  meta: reset_connection

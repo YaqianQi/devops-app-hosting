@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlapp-fallback
+  labels:
+    app: mlapp-fallback
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mlapp-fallback
+  template:
+    metadata:
+      labels:
+        app: mlapp-fallback
+    spec:
+      containers:
+      - name: mlapp-fallback
+        image: yaqianqi/mlapp-fallback
+        ports:
+          - containerPort: 5000

@@ -1,0 +1,62 @@
+---
+
+- hosts: "all"
+  become: "yes"
+
+  roles:
+    - role: "./roles"
+      docker_users:
+        - "vagrant"
+
+  tasks:
+
+    - name: Gather the package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: "Install minicube"
+      ansible.builtin.apt:
+        deb: "https://github.com/kubernetes/minikube/releases/download/v1.17.1/minikube_1.17.1-0_amd64.deb"
+      when: "'minikube' not in ansible_facts.packages"
+
+    - name: "Add repo keys"
+      ansible.builtin.apt_key:
+        url: "{{ item }}"
+        state: "present"
+      with_items:
+        - "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+
+    - name: "Add repositories"
+      ansible.builtin.apt_repository:
+        repo: "{{ item }}"
+        state: present
+        update_cache: yes
+      with_items:
+        - "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+
+    - name: "Install kubectl"
+      ansible.builtin.apt:
+        pkg: "{{ item }}"
+        state: "present"
+      with_items:
+        - "kubectl"
+
+    - name: "Check if minikube is already running"
+      ansible.builtin.command: "minikube status -f '{{ '{{' }} .Host {{'}}'}}'"
+      become: no
+      changed_when: false
+      failed_when: false
+      register: minikube_status
+
+    - name: "Launch minikube"
+      ansible.builtin.shell:
+        cmd: "minikube start"
+      when: "not minikube_status.stdout or minikube_status.stdout != 'Running'"
+      become: no
+
+    - name: "Set up autocompletion"
+      become_user: vagrant
+      lineinfile:
+        path: "/home/vagrant/.bashrc"
+        regexp: "^source <(kubectl completion bash)"
+        line: "source <(kubectl completion bash)"
