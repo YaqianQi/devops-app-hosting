@@ -1,7 +1,7 @@
 # ML App Deployment in Kubernetes 
 
 ## Machine learning App
-Given comment, the application infers the sentiment. 
+Given comment, the application infers the sentiment. [Know more](https://github.com/YaqianQi/Courses/tree/master/hse-hw/DevOps/finalProject/App) 
 
 ### docker build and push to docker hub 
 ```
